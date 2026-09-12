@@ -1,4 +1,5 @@
 from django.urls import path
+
 from . import views
 
 
@@ -19,5 +20,11 @@ urlpatterns = [
         "quotations/",
         views.quotation_dashboard,
         name="quotation_dashboard",
+    ),
+
+    path(
+        "quotations/<int:quotation_id>/pdf/",
+        views.quotation_pdf,
+        name="quotation_pdf",
     ),
 ]

@@ -1,10 +1,12 @@
 from datetime import timedelta
 
-from django.shortcuts import redirect, render
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import QuoteRequestForm
 from .models import QuoteRequestItem, Quotation
+from .pdf.quotation_pdf import generate_quotation_pdf
 
 
 def quote_request(request):
@@ -17,13 +19,11 @@ def quote_request(request):
             # -----------------------------------------
             quote_request = form.save(commit=False)
 
-            # Get selected customer
             customer = form.cleaned_data["customer"]
 
             # Automatically assign business
             quote_request.business = customer.business
 
-            # Save quote request
             quote_request.save()
 
             # -----------------------------------------
@@ -42,7 +42,6 @@ def quote_request(request):
                     )
                 )
 
-                # Prevent invalid quantity
                 if quantity < 1:
                     quantity = 1
 
@@ -89,23 +88,17 @@ def quote_request(request):
                 ),
             )
 
-            # -----------------------------------------
-            # 7. Redirect to Success Page
-            # -----------------------------------------
             return redirect("quote_request_success")
 
     else:
         form = QuoteRequestForm()
 
-    # -----------------------------------------
-    # Render Quote Request Form
-    # -----------------------------------------
     return render(
         request,
         "quotations/quote_request.html",
         {
             "form": form,
-        }
+        },
     )
 
 
@@ -114,6 +107,36 @@ def quote_request_success(request):
         request,
         "quotations/quote_request_success.html"
     )
+
+
+def quotation_pdf(request, quotation_id):
+    """
+    Generate and return the quotation PDF.
+    """
+
+    quotation = get_object_or_404(
+        Quotation.objects.select_related(
+            "business",
+            "customer",
+            "quote_request",
+        ),
+        id=quotation_id,
+    )
+
+    pdf = generate_quotation_pdf(quotation)
+
+    response = HttpResponse(
+        pdf,
+        content_type="application/pdf",
+    )
+
+    response["Content-Disposition"] = (
+        f'inline; filename="{quotation.quotation_number}.pdf"'
+    )
+
+    return response
+
+
 def quotation_dashboard(request):
     quotations = (
         Quotation.objects

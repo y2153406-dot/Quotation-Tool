@@ -33,12 +33,13 @@
     <!-- Statistics -->
     <div class="row g-4 mb-4">
 
+        <!-- Total Quotations -->
         <div class="col-md-4">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
                             <p class="text-secondary mb-1">
@@ -62,12 +63,13 @@
         </div>
 
 
+        <!-- Draft Quotations -->
         <div class="col-md-4">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
                             <p class="text-secondary mb-1">
@@ -91,12 +93,13 @@
         </div>
 
 
+        <!-- Dashboard Status -->
         <div class="col-md-4">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <div>
                             <p class="text-secondary mb-1">
@@ -145,12 +148,35 @@
                         <thead class="table-light">
 
                             <tr>
-                                <th class="px-4">Quotation</th>
-                                <th>Customer</th>
-                                <th>Business</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Date</th>
+
+                                <th class="px-4">
+                                    Quotation
+                                </th>
+
+                                <th>
+                                    Customer
+                                </th>
+
+                                <th>
+                                    Business
+                                </th>
+
+                                <th>
+                                    Total
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th class="text-center">
+                                    Action
+                                </th>
+
                             </tr>
 
                         </thead>
@@ -162,6 +188,7 @@
 
                                 <tr>
 
+                                    <!-- Quotation Number -->
                                     <td class="px-4">
 
                                         <span class="fw-semibold">
@@ -171,6 +198,7 @@
                                     </td>
 
 
+                                    <!-- Customer -->
                                     <td>
 
                                         <div class="fw-semibold">
@@ -188,11 +216,13 @@
                                     </td>
 
 
+                                    <!-- Business -->
                                     <td>
                                         {{ quotation.business.name }}
                                     </td>
 
 
+                                    <!-- Grand Total -->
                                     <td>
 
                                         <span class="fw-bold">
@@ -202,6 +232,7 @@
                                     </td>
 
 
+                                    <!-- Status -->
                                     <td>
 
                                         {% if quotation.status == "draft" %}
@@ -239,11 +270,28 @@
                                     </td>
 
 
+                                    <!-- Created Date -->
                                     <td>
 
                                         <small class="text-secondary">
                                             {{ quotation.created_at|date:"d M Y" }}
                                         </small>
+
+                                    </td>
+
+
+                                    <!-- Actions -->
+                                    <td class="text-center">
+
+                                        <a
+                                            href="{% url 'quotation_pdf' quotation.id %}"
+                                            target="_blank"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="View PDF"
+                                        >
+                                            <i class="bi bi-file-earmark-pdf me-1"></i>
+                                            PDF
+                                        </a>
 
                                     </td>
 
@@ -259,6 +307,7 @@
 
             {% else %}
 
+                <!-- Empty State -->
                 <div class="text-center py-5">
 
                     <i class="bi bi-receipt fs-1 text-secondary"></i>
@@ -275,6 +324,7 @@
                         href="{% url 'quote_request' %}"
                         class="btn btn-primary"
                     >
+                        <i class="bi bi-plus-lg me-2"></i>
                         Create Quotation
                     </a>
 
