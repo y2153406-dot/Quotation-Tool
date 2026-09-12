@@ -9,7 +9,10 @@ Quotation {{ quotation.quotation_number }}
 
 <div class="container py-5">
 
-    <!-- Header -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
 
         <div>
@@ -30,35 +33,48 @@ Quotation {{ quotation.quotation_number }}
 
 
         <!-- Status -->
+
         <div class="mt-3 mt-md-0">
 
             {% if quotation.status == "draft" %}
 
                 <span class="badge text-bg-warning fs-6 px-3 py-2">
+                    <i class="bi bi-file-earmark-text me-1"></i>
                     Draft
                 </span>
 
             {% elif quotation.status == "sent" %}
 
                 <span class="badge text-bg-primary fs-6 px-3 py-2">
+                    <i class="bi bi-send me-1"></i>
                     Sent
+                </span>
+
+            {% elif quotation.status == "viewed" %}
+
+                <span class="badge text-bg-info fs-6 px-3 py-2">
+                    <i class="bi bi-eye me-1"></i>
+                    Viewed
                 </span>
 
             {% elif quotation.status == "accepted" %}
 
                 <span class="badge text-bg-success fs-6 px-3 py-2">
+                    <i class="bi bi-check-circle me-1"></i>
                     Accepted
                 </span>
 
             {% elif quotation.status == "rejected" %}
 
                 <span class="badge text-bg-danger fs-6 px-3 py-2">
+                    <i class="bi bi-x-circle me-1"></i>
                     Rejected
                 </span>
 
             {% elif quotation.status == "expired" %}
 
                 <span class="badge text-bg-secondary fs-6 px-3 py-2">
+                    <i class="bi bi-calendar-x me-1"></i>
                     Expired
                 </span>
 
@@ -69,16 +85,23 @@ Quotation {{ quotation.quotation_number }}
     </div>
 
 
-    <!-- Main Quotation Card -->
+    <!-- =====================================================
+         MAIN QUOTATION CARD
+    ====================================================== -->
+
     <div class="card border-0 shadow-sm">
 
         <div class="card-body p-4 p-md-5">
 
 
-            <!-- Business + Customer -->
+            <!-- =================================================
+                 BUSINESS + CUSTOMER
+            ================================================== -->
+
             <div class="row g-4 mb-5">
 
                 <!-- Business -->
+
                 <div class="col-md-6">
 
                     <h6 class="text-uppercase text-secondary fw-bold mb-3">
@@ -109,6 +132,7 @@ Quotation {{ quotation.quotation_number }}
 
 
                 <!-- Customer -->
+
                 <div class="col-md-6">
 
                     <h6 class="text-uppercase text-secondary fw-bold mb-3">
@@ -140,7 +164,10 @@ Quotation {{ quotation.quotation_number }}
             </div>
 
 
-            <!-- Quotation Details -->
+            <!-- =================================================
+                 QUOTATION DETAILS
+            ================================================== -->
+
             <div class="table-responsive mb-5">
 
                 <table class="table align-middle">
@@ -185,6 +212,23 @@ Quotation {{ quotation.quotation_number }}
 
                         </tr>
 
+
+                        {% if quotation.viewed_at %}
+
+                            <tr>
+
+                                <th class="text-secondary">
+                                    Viewed At
+                                </th>
+
+                                <td>
+                                    {{ quotation.viewed_at|date:"d M Y, h:i A" }}
+                                </td>
+
+                            </tr>
+
+                        {% endif %}
+
                     </tbody>
 
                 </table>
@@ -192,7 +236,10 @@ Quotation {{ quotation.quotation_number }}
             </div>
 
 
-            <!-- Services -->
+            <!-- =================================================
+                 SERVICES
+            ================================================== -->
+
             <h5 class="fw-bold mb-3">
                 Services
             </h5>
@@ -279,7 +326,10 @@ Quotation {{ quotation.quotation_number }}
             </div>
 
 
-            <!-- Pricing -->
+            <!-- =================================================
+                 PRICING
+            ================================================== -->
+
             <div class="row justify-content-end">
 
                 <div class="col-md-6 col-lg-5">
@@ -287,6 +337,7 @@ Quotation {{ quotation.quotation_number }}
                     <div class="border rounded-3 p-4">
 
                         <!-- Subtotal -->
+
                         <div class="d-flex justify-content-between mb-2">
 
                             <span class="text-secondary">
@@ -301,6 +352,7 @@ Quotation {{ quotation.quotation_number }}
 
 
                         <!-- Discount -->
+
                         <div class="d-flex justify-content-between mb-2">
 
                             <span class="text-secondary">
@@ -316,6 +368,7 @@ Quotation {{ quotation.quotation_number }}
 
 
                         <!-- GST -->
+
                         <div class="d-flex justify-content-between mb-3">
 
                             <span class="text-secondary">
@@ -334,6 +387,7 @@ Quotation {{ quotation.quotation_number }}
 
 
                         <!-- Grand Total -->
+
                         <div class="d-flex justify-content-between align-items-center">
 
                             <span class="fw-bold fs-5">
@@ -353,7 +407,10 @@ Quotation {{ quotation.quotation_number }}
             </div>
 
 
-            <!-- Project Requirements -->
+            <!-- =================================================
+                 PROJECT REQUIREMENTS
+            ================================================== -->
+
             {% if quotation.quote_request.requirements %}
 
                 <div class="mt-5">
@@ -375,10 +432,14 @@ Quotation {{ quotation.quotation_number }}
             {% endif %}
 
 
-            <!-- Actions -->
+            <!-- =================================================
+                 ACTIONS
+            ================================================== -->
+
             <div class="d-flex flex-column flex-sm-row flex-wrap gap-3 mt-5">
 
                 <!-- View PDF -->
+
                 <a
                     href="{% url 'quotation_pdf' quotation.id %}"
                     target="_blank"
@@ -390,6 +451,7 @@ Quotation {{ quotation.quotation_number }}
 
 
                 <!-- Download Quotation -->
+
                 <a
                     href="{% url 'quotation_pdf' quotation.id %}"
                     target="_blank"
@@ -400,9 +462,14 @@ Quotation {{ quotation.quotation_number }}
                 </a>
 
 
-                {% if quotation.status == "sent" %}
+                <!-- =================================================
+                     SENT / VIEWED
+                ================================================== -->
 
-                    <!-- Accept Quotation -->
+                {% if quotation.status == "sent" or quotation.status == "viewed" %}
+
+                    <!-- Accept -->
+
                     <form
                         method="POST"
                         action="{% url 'accept_quotation' quotation.public_token %}"
@@ -422,7 +489,8 @@ Quotation {{ quotation.quotation_number }}
                     </form>
 
 
-                    <!-- Reject Quotation -->
+                    <!-- Reject -->
+
                     <form
                         method="POST"
                         action="{% url 'reject_quotation' quotation.public_token %}"
@@ -443,9 +511,12 @@ Quotation {{ quotation.quotation_number }}
                     </form>
 
 
+                <!-- =================================================
+                     ACCEPTED
+                ================================================== -->
+
                 {% elif quotation.status == "accepted" %}
 
-                    <!-- Accepted Message -->
                     <div class="alert alert-success mb-0 d-flex align-items-center">
 
                         <i class="bi bi-check-circle-fill me-2"></i>
@@ -457,9 +528,12 @@ Quotation {{ quotation.quotation_number }}
                     </div>
 
 
+                <!-- =================================================
+                     REJECTED
+                ================================================== -->
+
                 {% elif quotation.status == "rejected" %}
 
-                    <!-- Rejected Message -->
                     <div class="alert alert-danger mb-0 d-flex align-items-center">
 
                         <i class="bi bi-x-circle-fill me-2"></i>
@@ -470,9 +544,13 @@ Quotation {{ quotation.quotation_number }}
 
                     </div>
 
+
+                <!-- =================================================
+                     DRAFT
+                ================================================== -->
+
                 {% elif quotation.status == "draft" %}
 
-                    <!-- Draft Message -->
                     <div class="alert alert-warning mb-0 d-flex align-items-center">
 
                         <i class="bi bi-clock me-2"></i>
@@ -484,16 +562,34 @@ Quotation {{ quotation.quotation_number }}
                     </div>
 
 
+                <!-- =================================================
+                     EXPIRED
+                ================================================== -->
+
                 {% elif quotation.status == "expired" %}
 
-                    <!-- Expired Message -->
-                    <div class="alert alert-secondary mb-0 d-flex align-items-center">
+                    <div class="alert alert-secondary mb-0">
 
-                        <i class="bi bi-calendar-x me-2"></i>
+                        <div class="d-flex align-items-center">
 
-                        <strong>
-                            This quotation has expired.
-                        </strong>
+                            <i class="bi bi-calendar-x me-2 fs-5"></i>
+
+                            <strong>
+                                This quotation has expired.
+                            </strong>
+
+                        </div>
+
+                        <div class="mt-2 small text-secondary">
+
+                            This quotation was valid until
+                            <strong>
+                                {{ quotation.valid_until|date:"d M Y" }}
+                            </strong>.
+
+                            You can no longer accept or reject this quotation.
+
+                        </div>
 
                     </div>
 
@@ -506,7 +602,10 @@ Quotation {{ quotation.quotation_number }}
     </div>
 
 
-    <!-- Footer Message -->
+    <!-- =====================================================
+         FOOTER MESSAGE
+    ====================================================== -->
+
     <div class="text-center mt-4">
 
         <p class="text-secondary small mb-0">

@@ -6,7 +6,10 @@
 
 <div class="container py-5">
 
-    <!-- Header -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
 
         <div>
@@ -30,11 +33,14 @@
     </div>
 
 
-    <!-- Statistics -->
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
     <div class="row g-4 mb-4">
 
         <!-- Total -->
-        <div class="col-md-3">
+        <div class="col-md-4 col-lg-2">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -43,7 +49,7 @@
 
                         <div>
                             <p class="text-secondary mb-1">
-                                Total Quotations
+                                Total
                             </p>
 
                             <h3 class="fw-bold mb-0">
@@ -64,7 +70,7 @@
 
 
         <!-- Draft -->
-        <div class="col-md-3">
+        <div class="col-md-4 col-lg-2">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -73,7 +79,7 @@
 
                         <div>
                             <p class="text-secondary mb-1">
-                                Draft Quotations
+                                Draft
                             </p>
 
                             <h3 class="fw-bold mb-0">
@@ -94,7 +100,7 @@
 
 
         <!-- Sent -->
-        <div class="col-md-3">
+        <div class="col-md-4 col-lg-2">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -103,7 +109,7 @@
 
                         <div>
                             <p class="text-secondary mb-1">
-                                Sent Quotations
+                                Sent
                             </p>
 
                             <h3 class="fw-bold mb-0">
@@ -123,8 +129,8 @@
         </div>
 
 
-        <!-- Accepted -->
-        <div class="col-md-3">
+        <!-- Viewed -->
+        <div class="col-md-4 col-lg-2">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -133,7 +139,37 @@
 
                         <div>
                             <p class="text-secondary mb-1">
-                                Accepted Quotations
+                                Viewed
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ viewed_quotations }}
+                            </h3>
+                        </div>
+
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-eye text-primary fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Accepted -->
+        <div class="col-md-4 col-lg-2">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-secondary mb-1">
+                                Accepted
                             </p>
 
                             <h3 class="fw-bold mb-0">
@@ -152,10 +188,43 @@
 
         </div>
 
+
+        <!-- Rejected -->
+        <div class="col-md-4 col-lg-2">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-secondary mb-1">
+                                Rejected
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ rejected_quotations }}
+                            </h3>
+                        </div>
+
+                        <div class="bg-danger bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
 
-    <!-- Quotations Table -->
+    <!-- =====================================================
+         QUOTATIONS TABLE
+    ====================================================== -->
+
     <div class="card border-0 shadow-sm">
 
         <div class="card-header bg-white border-0 py-3">
@@ -200,7 +269,11 @@
                                 </th>
 
                                 <th>
-                                    Date
+                                    Created
+                                </th>
+
+                                <th>
+                                    Viewed
                                 </th>
 
                                 <th class="text-center">
@@ -243,6 +316,16 @@
 
                                         {% endif %}
 
+                                        {% if quotation.customer.email %}
+
+                                            <div>
+                                                <small class="text-secondary">
+                                                    {{ quotation.customer.email }}
+                                                </small>
+                                            </div>
+
+                                        {% endif %}
+
                                     </td>
 
 
@@ -274,18 +357,28 @@
                                         {% elif quotation.status == "sent" %}
 
                                             <span class="badge text-bg-primary">
+                                                <i class="bi bi-send me-1"></i>
                                                 Sent
+                                            </span>
+
+                                        {% elif quotation.status == "viewed" %}
+
+                                            <span class="badge text-bg-info">
+                                                <i class="bi bi-eye me-1"></i>
+                                                Viewed
                                             </span>
 
                                         {% elif quotation.status == "accepted" %}
 
                                             <span class="badge text-bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
                                                 Accepted
                                             </span>
 
                                         {% elif quotation.status == "rejected" %}
 
                                             <span class="badge text-bg-danger">
+                                                <i class="bi bi-x-circle me-1"></i>
                                                 Rejected
                                             </span>
 
@@ -300,7 +393,7 @@
                                     </td>
 
 
-                                    <!-- Date -->
+                                    <!-- Created Date -->
                                     <td>
 
                                         <small class="text-secondary">
@@ -310,10 +403,34 @@
                                     </td>
 
 
+                                    <!-- Viewed At -->
+                                    <td>
+
+                                        {% if quotation.viewed_at %}
+
+                                            <div class="small fw-semibold">
+                                                {{ quotation.viewed_at|date:"d M Y" }}
+                                            </div>
+
+                                            <div class="small text-secondary">
+                                                {{ quotation.viewed_at|date:"h:i A" }}
+                                            </div>
+
+                                        {% else %}
+
+                                            <small class="text-secondary">
+                                                Not viewed
+                                            </small>
+
+                                        {% endif %}
+
+                                    </td>
+
+
                                     <!-- Actions -->
                                     <td class="text-center">
 
-                                        <div class="d-flex justify-content-center gap-2">
+                                        <div class="d-flex justify-content-center gap-2 flex-wrap">
 
                                             <!-- PDF -->
                                             <a
@@ -328,7 +445,7 @@
 
 
                                             <!-- Email -->
-                                            {% if quotation.status == "sent" %}
+                                            {% if quotation.status == "sent" or quotation.status == "viewed" %}
 
                                                 <a
                                                     href="{% url 'send_quotation_email' quotation.id %}"
@@ -369,6 +486,7 @@
             {% else %}
 
                 <!-- Empty State -->
+
                 <div class="text-center py-5">
 
                     <i class="bi bi-receipt fs-1 text-secondary"></i>

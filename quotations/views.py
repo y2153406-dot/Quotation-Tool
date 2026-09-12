@@ -199,8 +199,16 @@ def quotation_dashboard(request):
         status="sent"
     ).count()
 
+    viewed_quotations = quotations.filter(
+        status="viewed"
+    ).count()
+
     accepted_quotations = quotations.filter(
         status="accepted"
+    ).count()
+
+    rejected_quotations = quotations.filter(
+        status="rejected"
     ).count()
 
     return render(
@@ -211,10 +219,11 @@ def quotation_dashboard(request):
             "total_quotations": total_quotations,
             "draft_quotations": draft_quotations,
             "sent_quotations": sent_quotations,
+            "viewed_quotations": viewed_quotations,
             "accepted_quotations": accepted_quotations,
+            "rejected_quotations": rejected_quotations,
         },
     )
-
 
 # ============================================================
 # SEND QUOTATION EMAIL
@@ -417,7 +426,6 @@ def public_quotation_view(request, public_token):
 def accept_quotation(request, public_token):
 
     if request.method != "POST":
-
         return redirect(
             "public_quotation_view",
             public_token=public_token,
@@ -428,8 +436,34 @@ def accept_quotation(request, public_token):
         public_token=public_token,
     )
 
-    # Only sent quotations can be accepted
-    if quotation.status == "sent":
+    # -----------------------------------------
+    # Check quotation expiry
+    # -----------------------------------------
+
+    if (
+        quotation.valid_until
+        and quotation.valid_until < timezone.now().date()
+        and quotation.status in ["draft", "sent", "viewed"]
+    ):
+        quotation.status = "expired"
+
+        quotation.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        return redirect(
+            "public_quotation_view",
+            public_token=public_token,
+        )
+
+    # -----------------------------------------
+    # Accept quotation
+    # -----------------------------------------
+
+    if quotation.status in ["sent", "viewed"]:
 
         quotation.status = "accepted"
 
@@ -445,7 +479,6 @@ def accept_quotation(request, public_token):
         public_token=public_token,
     )
 
-
 # ============================================================
 # REJECT QUOTATION
 # ============================================================
@@ -453,7 +486,6 @@ def accept_quotation(request, public_token):
 def reject_quotation(request, public_token):
 
     if request.method != "POST":
-
         return redirect(
             "public_quotation_view",
             public_token=public_token,
@@ -464,8 +496,34 @@ def reject_quotation(request, public_token):
         public_token=public_token,
     )
 
-    # Only sent quotations can be rejected
-    if quotation.status == "sent":
+    # -----------------------------------------
+    # Check quotation expiry
+    # -----------------------------------------
+
+    if (
+        quotation.valid_until
+        and quotation.valid_until < timezone.now().date()
+        and quotation.status in ["draft", "sent", "viewed"]
+    ):
+        quotation.status = "expired"
+
+        quotation.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        return redirect(
+            "public_quotation_view",
+            public_token=public_token,
+        )
+
+    # -----------------------------------------
+    # Reject quotation
+    # -----------------------------------------
+
+    if quotation.status in ["sent", "viewed"]:
 
         quotation.status = "rejected"
 
