@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,14 +10,33 @@ from .models import QuoteRequestItem, Quotation
 from .pdf.quotation_pdf import generate_quotation_pdf
 
 
+# ============================================================
+# HOME
+# ============================================================
+
+def home(request):
+    return render(
+        request,
+        "quotations/home.html"
+    )
+
+
+# ============================================================
+# QUOTE REQUEST
+# ============================================================
+
 def quote_request(request):
+
     if request.method == "POST":
+
         form = QuoteRequestForm(request.POST)
 
         if form.is_valid():
+
             # -----------------------------------------
             # 1. Create Quote Request
             # -----------------------------------------
+
             quote_request = form.save(commit=False)
 
             customer = form.cleaned_data["customer"]
@@ -29,12 +49,15 @@ def quote_request(request):
             # -----------------------------------------
             # 2. Get Selected Services
             # -----------------------------------------
+
             selected_services = form.cleaned_data["services"]
 
             # -----------------------------------------
             # 3. Create Quote Request Items
             # -----------------------------------------
+
             for service in selected_services:
+
                 quantity = int(
                     request.POST.get(
                         f"quantity_{service.id}",
@@ -55,6 +78,7 @@ def quote_request(request):
             # -----------------------------------------
             # 4. Calculate Quotation Amounts
             # -----------------------------------------
+
             subtotal = quote_request.subtotal
             discount_amount = quote_request.discount_amount
             tax_amount = quote_request.tax_amount
@@ -63,6 +87,7 @@ def quote_request(request):
             # -----------------------------------------
             # 5. Generate Quotation Number
             # -----------------------------------------
+
             quotation_number = (
                 f"QT-{timezone.now().year}-{quote_request.id:04d}"
             )
@@ -70,6 +95,7 @@ def quote_request(request):
             # -----------------------------------------
             # 6. Create Quotation
             # -----------------------------------------
+
             Quotation.objects.create(
                 quote_request=quote_request,
                 quotation_number=quotation_number,
@@ -91,6 +117,7 @@ def quote_request(request):
             return redirect("quote_request_success")
 
     else:
+
         form = QuoteRequestForm()
 
     return render(
@@ -102,12 +129,21 @@ def quote_request(request):
     )
 
 
+# ============================================================
+# QUOTE REQUEST SUCCESS
+# ============================================================
+
 def quote_request_success(request):
+
     return render(
         request,
         "quotations/quote_request_success.html"
     )
 
+
+# ============================================================
+# QUOTATION PDF
+# ============================================================
 
 def quotation_pdf(request, quotation_id):
     """
@@ -137,7 +173,12 @@ def quotation_pdf(request, quotation_id):
     return response
 
 
+# ============================================================
+# QUOTATION DASHBOARD
+# ============================================================
+
 def quotation_dashboard(request):
+
     quotations = (
         Quotation.objects
         .select_related(
@@ -149,12 +190,15 @@ def quotation_dashboard(request):
     )
 
     total_quotations = quotations.count()
+
     draft_quotations = quotations.filter(
         status="draft"
     ).count()
+
     sent_quotations = quotations.filter(
         status="sent"
     ).count()
+
     accepted_quotations = quotations.filter(
         status="accepted"
     ).count()
@@ -170,10 +214,20 @@ def quotation_dashboard(request):
             "accepted_quotations": accepted_quotations,
         },
     )
+
+
+# ============================================================
+# SEND QUOTATION EMAIL
+# ============================================================
+
 def send_quotation_email(request, quotation_id):
     """
     Generate quotation PDF and send it to the customer by email.
     """
+
+    # -----------------------------------------
+    # 1. Get Quotation
+    # -----------------------------------------
 
     quotation = get_object_or_404(
         Quotation.objects.select_related(
@@ -184,13 +238,68 @@ def send_quotation_email(request, quotation_id):
         id=quotation_id,
     )
 
-    # Generate PDF
+    # -----------------------------------------
+    # 2. Get Customer Email
+    # -----------------------------------------
+
+    customer_email = (
+        quotation.customer.email or ""
+    ).strip()
+
+    # Debug information
+    print("=" * 60)
+    print("QUOTATION EMAIL")
+    print("Quotation:", quotation.quotation_number)
+    print("Customer:", quotation.customer.name)
+    print("Customer Email:", repr(customer_email))
+    print("=" * 60)
+
+    # -----------------------------------------
+    # 3. Check Customer Email
+    # -----------------------------------------
+
+    if not customer_email:
+        return HttpResponse(
+            "Customer email address is missing.",
+            status=400,
+        )
+
+    # -----------------------------------------
+    # 4. Generate Quotation PDF
+    # -----------------------------------------
+
     pdf = generate_quotation_pdf(quotation)
+
+    # -----------------------------------------
+    # 5. Create Public Quotation URL
+    # -----------------------------------------
+
+    public_url = request.build_absolute_uri(
+        f"/quotation/view/{quotation.public_token}/"
+    )
+
+    # -----------------------------------------
+    # 6. Email Subject
+    # -----------------------------------------
 
     subject = (
         f"Quotation {quotation.quotation_number} "
         f"from {quotation.business.name}"
     )
+
+    # -----------------------------------------
+    # 7. Valid Until
+    # -----------------------------------------
+
+    valid_until = (
+        quotation.valid_until.strftime("%d %b %Y")
+        if quotation.valid_until
+        else "N/A"
+    )
+
+    # -----------------------------------------
+    # 8. Email Body
+    # -----------------------------------------
 
     message = f"""
 Dear {quotation.customer.name},
@@ -200,11 +309,11 @@ Please find attached your quotation
 
 Quotation Amount: ₹{quotation.grand_total:,.2f}
 
-Valid Until: {
-    quotation.valid_until.strftime("%d %b %Y")
-    if quotation.valid_until
-    else "N/A"
-}
+Valid Until: {valid_until}
+
+You can also view your quotation online:
+
+{public_url}
 
 Thank you for your business.
 
@@ -214,12 +323,20 @@ Regards,
 {quotation.business.phone}
 """
 
+    # -----------------------------------------
+    # 9. Create Email
+    # -----------------------------------------
+
     email = EmailMessage(
         subject=subject,
         body=message,
-        from_email=None,
-        to=[quotation.customer.email],
+        from_email="y2153406@gmail.com",
+        to=[customer_email],
     )
+
+    # -----------------------------------------
+    # 10. Attach PDF
+    # -----------------------------------------
 
     email.attach(
         f"{quotation.quotation_number}.pdf",
@@ -227,14 +344,139 @@ Regards,
         "application/pdf",
     )
 
-    email.send(fail_silently=False)
+    # -----------------------------------------
+    # 11. Send Email
+    # -----------------------------------------
 
-    quotation.status = "sent"
-    quotation.save(
-        update_fields=[
-            "status",
-            "updated_at",
-        ]
+    print("Sending quotation email...")
+    print("Sending to:", customer_email)
+
+    sent_count = email.send(
+        fail_silently=False
     )
 
-    return redirect("quotation_dashboard")
+    print("Email send result:", sent_count)
+
+    # -----------------------------------------
+    # 12. Update Status
+    # -----------------------------------------
+
+    if sent_count == 1:
+
+        quotation.status = "sent"
+
+        quotation.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+        print("Quotation status updated to SENT.")
+
+    # -----------------------------------------
+    # 13. Redirect Dashboard
+    # -----------------------------------------
+
+    return redirect(
+        "quotation_dashboard"
+    )
+
+
+# ============================================================
+# PUBLIC QUOTATION VIEW
+# ============================================================
+
+def public_quotation_view(request, public_token):
+
+    quotation = get_object_or_404(
+        Quotation.objects.select_related(
+            "business",
+            "customer",
+            "quote_request",
+        ).prefetch_related(
+            "quote_request__items__service"
+        ),
+        public_token=public_token,
+    )
+
+    return render(
+        request,
+        "quotations/public_quotation.html",
+        {
+            "quotation": quotation,
+            "items": quotation.quote_request.items.all(),
+        },
+    )
+
+
+# ============================================================
+# ACCEPT QUOTATION
+# ============================================================
+
+def accept_quotation(request, public_token):
+
+    if request.method != "POST":
+
+        return redirect(
+            "public_quotation_view",
+            public_token=public_token,
+        )
+
+    quotation = get_object_or_404(
+        Quotation,
+        public_token=public_token,
+    )
+
+    # Only sent quotations can be accepted
+    if quotation.status == "sent":
+
+        quotation.status = "accepted"
+
+        quotation.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+    return redirect(
+        "public_quotation_view",
+        public_token=public_token,
+    )
+
+
+# ============================================================
+# REJECT QUOTATION
+# ============================================================
+
+def reject_quotation(request, public_token):
+
+    if request.method != "POST":
+
+        return redirect(
+            "public_quotation_view",
+            public_token=public_token,
+        )
+
+    quotation = get_object_or_404(
+        Quotation,
+        public_token=public_token,
+    )
+
+    # Only sent quotations can be rejected
+    if quotation.status == "sent":
+
+        quotation.status = "rejected"
+
+        quotation.save(
+            update_fields=[
+                "status",
+                "updated_at",
+            ]
+        )
+
+    return redirect(
+        "public_quotation_view",
+        public_token=public_token,
+    )

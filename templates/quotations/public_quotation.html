@@ -1,0 +1,520 @@
+{% extends "base.html" %}
+
+{% block title %}
+Quotation {{ quotation.quotation_number }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+
+        <div>
+
+            <p class="text-primary fw-semibold mb-1">
+                {{ quotation.business.name }}
+            </p>
+
+            <h1 class="fw-bold mb-1">
+                Quotation
+            </h1>
+
+            <p class="text-secondary mb-0">
+                {{ quotation.quotation_number }}
+            </p>
+
+        </div>
+
+
+        <!-- Status -->
+        <div class="mt-3 mt-md-0">
+
+            {% if quotation.status == "draft" %}
+
+                <span class="badge text-bg-warning fs-6 px-3 py-2">
+                    Draft
+                </span>
+
+            {% elif quotation.status == "sent" %}
+
+                <span class="badge text-bg-primary fs-6 px-3 py-2">
+                    Sent
+                </span>
+
+            {% elif quotation.status == "accepted" %}
+
+                <span class="badge text-bg-success fs-6 px-3 py-2">
+                    Accepted
+                </span>
+
+            {% elif quotation.status == "rejected" %}
+
+                <span class="badge text-bg-danger fs-6 px-3 py-2">
+                    Rejected
+                </span>
+
+            {% elif quotation.status == "expired" %}
+
+                <span class="badge text-bg-secondary fs-6 px-3 py-2">
+                    Expired
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- Main Quotation Card -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4 p-md-5">
+
+
+            <!-- Business + Customer -->
+            <div class="row g-4 mb-5">
+
+                <!-- Business -->
+                <div class="col-md-6">
+
+                    <h6 class="text-uppercase text-secondary fw-bold mb-3">
+                        From
+                    </h6>
+
+                    <h4 class="fw-bold mb-2">
+                        {{ quotation.business.name }}
+                    </h4>
+
+                    {% if quotation.business.address %}
+
+                        <p class="text-secondary mb-1">
+                            {{ quotation.business.address }}
+                        </p>
+
+                    {% endif %}
+
+                    <p class="text-secondary mb-1">
+                        {{ quotation.business.email }}
+                    </p>
+
+                    <p class="text-secondary mb-0">
+                        {{ quotation.business.phone }}
+                    </p>
+
+                </div>
+
+
+                <!-- Customer -->
+                <div class="col-md-6">
+
+                    <h6 class="text-uppercase text-secondary fw-bold mb-3">
+                        Bill To
+                    </h6>
+
+                    <h4 class="fw-bold mb-2">
+                        {{ quotation.customer.name }}
+                    </h4>
+
+                    {% if quotation.customer.company_name %}
+
+                        <p class="text-secondary mb-1">
+                            {{ quotation.customer.company_name }}
+                        </p>
+
+                    {% endif %}
+
+                    <p class="text-secondary mb-1">
+                        {{ quotation.customer.email }}
+                    </p>
+
+                    <p class="text-secondary mb-0">
+                        {{ quotation.customer.phone }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Quotation Details -->
+            <div class="table-responsive mb-5">
+
+                <table class="table align-middle">
+
+                    <tbody>
+
+                        <tr>
+
+                            <th class="text-secondary">
+                                Quotation Number
+                            </th>
+
+                            <td class="fw-semibold">
+                                {{ quotation.quotation_number }}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <th class="text-secondary">
+                                Date
+                            </th>
+
+                            <td>
+                                {{ quotation.created_at|date:"d M Y" }}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <th class="text-secondary">
+                                Valid Until
+                            </th>
+
+                            <td>
+                                {{ quotation.valid_until|date:"d M Y" }}
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- Services -->
+            <h5 class="fw-bold mb-3">
+                Services
+            </h5>
+
+            <div class="table-responsive mb-4">
+
+                <table class="table table-bordered align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                #
+                            </th>
+
+                            <th>
+                                Service
+                            </th>
+
+                            <th class="text-center">
+                                Qty
+                            </th>
+
+                            <th class="text-end">
+                                Unit Price
+                            </th>
+
+                            <th class="text-end">
+                                Total
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for item in items %}
+
+                            <tr>
+
+                                <td>
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <td>
+
+                                    <div class="fw-semibold">
+                                        {{ item.service.name }}
+                                    </div>
+
+                                    {% if item.service.description %}
+
+                                        <small class="text-secondary">
+                                            {{ item.service.description }}
+                                        </small>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td class="text-center">
+                                    {{ item.quantity }}
+                                </td>
+
+                                <td class="text-end">
+                                    ₹{{ item.unit_price|floatformat:2 }}
+                                </td>
+
+                                <td class="text-end fw-semibold">
+                                    ₹{{ item.total_price|floatformat:2 }}
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- Pricing -->
+            <div class="row justify-content-end">
+
+                <div class="col-md-6 col-lg-5">
+
+                    <div class="border rounded-3 p-4">
+
+                        <!-- Subtotal -->
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span class="text-secondary">
+                                Subtotal
+                            </span>
+
+                            <span class="fw-semibold">
+                                ₹{{ quotation.subtotal|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- Discount -->
+                        <div class="d-flex justify-content-between mb-2">
+
+                            <span class="text-secondary">
+                                Discount
+                                ({{ quotation.discount_percentage|floatformat:2 }}%)
+                            </span>
+
+                            <span class="text-danger">
+                                - ₹{{ quotation.discount_amount|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+
+                        <!-- GST -->
+                        <div class="d-flex justify-content-between mb-3">
+
+                            <span class="text-secondary">
+                                GST
+                                ({{ quotation.tax_percentage|floatformat:2 }}%)
+                            </span>
+
+                            <span class="fw-semibold">
+                                ₹{{ quotation.tax_amount|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+
+                        <hr>
+
+
+                        <!-- Grand Total -->
+                        <div class="d-flex justify-content-between align-items-center">
+
+                            <span class="fw-bold fs-5">
+                                Grand Total
+                            </span>
+
+                            <span class="fw-bold fs-4 text-primary">
+                                ₹{{ quotation.grand_total|floatformat:2 }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Project Requirements -->
+            {% if quotation.quote_request.requirements %}
+
+                <div class="mt-5">
+
+                    <h5 class="fw-bold mb-3">
+                        Project Requirements
+                    </h5>
+
+                    <div class="bg-light rounded-3 p-4">
+
+                        <p class="mb-0 text-secondary">
+                            {{ quotation.quote_request.requirements|linebreaksbr }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- Actions -->
+            <div class="d-flex flex-column flex-sm-row flex-wrap gap-3 mt-5">
+
+                <!-- View PDF -->
+                <a
+                    href="{% url 'quotation_pdf' quotation.id %}"
+                    target="_blank"
+                    class="btn btn-primary"
+                >
+                    <i class="bi bi-file-earmark-pdf me-2"></i>
+                    View PDF
+                </a>
+
+
+                <!-- Download Quotation -->
+                <a
+                    href="{% url 'quotation_pdf' quotation.id %}"
+                    target="_blank"
+                    class="btn btn-outline-secondary"
+                >
+                    <i class="bi bi-download me-2"></i>
+                    Download Quotation
+                </a>
+
+
+                {% if quotation.status == "sent" %}
+
+                    <!-- Accept Quotation -->
+                    <form
+                        method="POST"
+                        action="{% url 'accept_quotation' quotation.public_token %}"
+                        class="d-inline"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-success"
+                        >
+                            <i class="bi bi-check-circle me-2"></i>
+                            Accept Quotation
+                        </button>
+
+                    </form>
+
+
+                    <!-- Reject Quotation -->
+                    <form
+                        method="POST"
+                        action="{% url 'reject_quotation' quotation.public_token %}"
+                        class="d-inline"
+                        onsubmit="return confirm('Are you sure you want to reject this quotation?');"
+                    >
+
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-outline-danger"
+                        >
+                            <i class="bi bi-x-circle me-2"></i>
+                            Reject Quotation
+                        </button>
+
+                    </form>
+
+
+                {% elif quotation.status == "accepted" %}
+
+                    <!-- Accepted Message -->
+                    <div class="alert alert-success mb-0 d-flex align-items-center">
+
+                        <i class="bi bi-check-circle-fill me-2"></i>
+
+                        <strong>
+                            This quotation has been accepted.
+                        </strong>
+
+                    </div>
+
+
+                {% elif quotation.status == "rejected" %}
+
+                    <!-- Rejected Message -->
+                    <div class="alert alert-danger mb-0 d-flex align-items-center">
+
+                        <i class="bi bi-x-circle-fill me-2"></i>
+
+                        <strong>
+                            This quotation has been rejected.
+                        </strong>
+
+                    </div>
+
+                {% elif quotation.status == "draft" %}
+
+                    <!-- Draft Message -->
+                    <div class="alert alert-warning mb-0 d-flex align-items-center">
+
+                        <i class="bi bi-clock me-2"></i>
+
+                        <strong>
+                            This quotation has not been sent yet.
+                        </strong>
+
+                    </div>
+
+
+                {% elif quotation.status == "expired" %}
+
+                    <!-- Expired Message -->
+                    <div class="alert alert-secondary mb-0 d-flex align-items-center">
+
+                        <i class="bi bi-calendar-x me-2"></i>
+
+                        <strong>
+                            This quotation has expired.
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer Message -->
+    <div class="text-center mt-4">
+
+        <p class="text-secondary small mb-0">
+            Thank you for choosing {{ quotation.business.name }}.
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 
 class Business(models.Model):
@@ -178,10 +179,14 @@ class QuoteRequestItem(models.Model):
 
     def __str__(self):
         return f"{self.service.name} x {self.quantity}"
+
+
 class Quotation(models.Model):
+
     STATUS_CHOICES = [
         ("draft", "Draft"),
         ("sent", "Sent"),
+        ("viewed", "Viewed"),
         ("accepted", "Accepted"),
         ("rejected", "Rejected"),
         ("expired", "Expired"),
@@ -191,6 +196,12 @@ class Quotation(models.Model):
         QuoteRequest,
         on_delete=models.CASCADE,
         related_name="quotation"
+    )
+
+    public_token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
     )
 
     quotation_number = models.CharField(
@@ -248,6 +259,11 @@ class Quotation(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default="draft"
+    )
+
+    viewed_at = models.DateTimeField(
+        blank=True,
+        null=True
     )
 
     valid_until = models.DateField(
