@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from .models import Business, Customer, Service, QuoteRequest
+from .models import (
+    Business,
+    Customer,
+    Service,
+    QuoteRequest,
+    QuoteRequestItem,
+)
 
 
 @admin.register(Business)
@@ -66,3 +72,29 @@ class QuoteRequestAdmin(admin.ModelAdmin):
         "customer__email",
         "requirements",
     )
+
+@admin.register(QuoteRequestItem)
+class QuoteRequestItemAdmin(admin.ModelAdmin):
+    list_display = (
+        "quote_request",
+        "service",
+        "quantity",
+        "unit_price",
+        "total_price_display",
+        "created_at",
+    )
+
+    list_filter = (
+        "service",
+        "created_at",
+    )
+
+    search_fields = (
+        "service__name",
+        "quote_request__customer__name",
+    )
+
+    def total_price_display(self, obj):
+        return obj.total_price
+
+    total_price_display.short_description = "Total"
