@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Business, Customer, Service
+from .models import Business, Customer, Service, QuoteRequest
 
 
 @admin.register(Business)
@@ -42,4 +42,27 @@ class ServiceAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
         "description",
+    )
+
+@admin.register(QuoteRequest)
+class QuoteRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "customer",
+        "business",
+        "quantity",
+        "status",
+        "created_at",
+    )
+
+    list_filter = (
+        "status",
+        "business",
+        "created_at",
+    )
+
+    search_fields = (
+        "customer__name",
+        "customer__email",
+        "requirements",
     )
