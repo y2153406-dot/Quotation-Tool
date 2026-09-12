@@ -1,5 +1,5 @@
 from datetime import timedelta
-
+from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -148,10 +148,93 @@ def quotation_dashboard(request):
         .order_by("-created_at")
     )
 
+    total_quotations = quotations.count()
+    draft_quotations = quotations.filter(
+        status="draft"
+    ).count()
+    sent_quotations = quotations.filter(
+        status="sent"
+    ).count()
+    accepted_quotations = quotations.filter(
+        status="accepted"
+    ).count()
+
     return render(
         request,
         "quotations/quotation_dashboard.html",
         {
             "quotations": quotations,
+            "total_quotations": total_quotations,
+            "draft_quotations": draft_quotations,
+            "sent_quotations": sent_quotations,
+            "accepted_quotations": accepted_quotations,
         },
     )
+def send_quotation_email(request, quotation_id):
+    """
+    Generate quotation PDF and send it to the customer by email.
+    """
+
+    quotation = get_object_or_404(
+        Quotation.objects.select_related(
+            "business",
+            "customer",
+            "quote_request",
+        ),
+        id=quotation_id,
+    )
+
+    # Generate PDF
+    pdf = generate_quotation_pdf(quotation)
+
+    subject = (
+        f"Quotation {quotation.quotation_number} "
+        f"from {quotation.business.name}"
+    )
+
+    message = f"""
+Dear {quotation.customer.name},
+
+Please find attached your quotation
+{quotation.quotation_number}.
+
+Quotation Amount: ₹{quotation.grand_total:,.2f}
+
+Valid Until: {
+    quotation.valid_until.strftime("%d %b %Y")
+    if quotation.valid_until
+    else "N/A"
+}
+
+Thank you for your business.
+
+Regards,
+{quotation.business.name}
+{quotation.business.email}
+{quotation.business.phone}
+"""
+
+    email = EmailMessage(
+        subject=subject,
+        body=message,
+        from_email=None,
+        to=[quotation.customer.email],
+    )
+
+    email.attach(
+        f"{quotation.quotation_number}.pdf",
+        pdf,
+        "application/pdf",
+    )
+
+    email.send(fail_silently=False)
+
+    quotation.status = "sent"
+    quotation.save(
+        update_fields=[
+            "status",
+            "updated_at",
+        ]
+    )
+
+    return redirect("quotation_dashboard")

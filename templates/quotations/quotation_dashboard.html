@@ -33,8 +33,8 @@
     <!-- Statistics -->
     <div class="row g-4 mb-4">
 
-        <!-- Total Quotations -->
-        <div class="col-md-4">
+        <!-- Total -->
+        <div class="col-md-3">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -47,7 +47,7 @@
                             </p>
 
                             <h3 class="fw-bold mb-0">
-                                {{ quotations|length }}
+                                {{ total_quotations }}
                             </h3>
                         </div>
 
@@ -63,8 +63,8 @@
         </div>
 
 
-        <!-- Draft Quotations -->
-        <div class="col-md-4">
+        <!-- Draft -->
+        <div class="col-md-3">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -77,7 +77,7 @@
                             </p>
 
                             <h3 class="fw-bold mb-0">
-                                {{ quotations|length }}
+                                {{ draft_quotations }}
                             </h3>
                         </div>
 
@@ -93,8 +93,8 @@
         </div>
 
 
-        <!-- Dashboard Status -->
-        <div class="col-md-4">
+        <!-- Sent -->
+        <div class="col-md-3">
 
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
@@ -103,16 +103,46 @@
 
                         <div>
                             <p class="text-secondary mb-1">
-                                Dashboard
+                                Sent Quotations
                             </p>
 
                             <h3 class="fw-bold mb-0">
-                                Active
+                                {{ sent_quotations }}
+                            </h3>
+                        </div>
+
+                        <div class="bg-info bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-send text-info fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- Accepted -->
+        <div class="col-md-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <p class="text-secondary mb-1">
+                                Accepted Quotations
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ accepted_quotations }}
                             </h3>
                         </div>
 
                         <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                            <i class="bi bi-speedometer2 text-success fs-4"></i>
+                            <i class="bi bi-check-circle text-success fs-4"></i>
                         </div>
 
                     </div>
@@ -222,7 +252,7 @@
                                     </td>
 
 
-                                    <!-- Grand Total -->
+                                    <!-- Total -->
                                     <td>
 
                                         <span class="fw-bold">
@@ -270,7 +300,7 @@
                                     </td>
 
 
-                                    <!-- Created Date -->
+                                    <!-- Date -->
                                     <td>
 
                                         <small class="text-secondary">
@@ -283,15 +313,46 @@
                                     <!-- Actions -->
                                     <td class="text-center">
 
-                                        <a
-                                            href="{% url 'quotation_pdf' quotation.id %}"
-                                            target="_blank"
-                                            class="btn btn-sm btn-outline-primary"
-                                            title="View PDF"
-                                        >
-                                            <i class="bi bi-file-earmark-pdf me-1"></i>
-                                            PDF
-                                        </a>
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            <!-- PDF -->
+                                            <a
+                                                href="{% url 'quotation_pdf' quotation.id %}"
+                                                target="_blank"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="View PDF"
+                                            >
+                                                <i class="bi bi-file-earmark-pdf me-1"></i>
+                                                PDF
+                                            </a>
+
+
+                                            <!-- Email -->
+                                            {% if quotation.status == "sent" %}
+
+                                                <a
+                                                    href="{% url 'send_quotation_email' quotation.id %}"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    title="Resend quotation"
+                                                >
+                                                    <i class="bi bi-arrow-repeat me-1"></i>
+                                                    Resend
+                                                </a>
+
+                                            {% else %}
+
+                                                <a
+                                                    href="{% url 'send_quotation_email' quotation.id %}"
+                                                    class="btn btn-sm btn-outline-success"
+                                                    title="Send quotation by email"
+                                                >
+                                                    <i class="bi bi-send me-1"></i>
+                                                    Send Email
+                                                </a>
+
+                                            {% endif %}
+
+                                        </div>
 
                                     </td>
 

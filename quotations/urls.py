@@ -27,4 +27,10 @@ urlpatterns = [
         views.quotation_pdf,
         name="quotation_pdf",
     ),
+
+    path(
+        "quotations/<int:quotation_id>/send-email/",
+        views.send_quotation_email,
+        name="send_quotation_email",
+    ),
 ]
