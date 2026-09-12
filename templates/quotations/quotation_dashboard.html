@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Quotation Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+
+        <div>
+            <h1 class="fw-bold mb-1">
+                Quotation Dashboard
+            </h1>
+
+            <p class="text-secondary mb-0">
+                Manage all your quotations from one place.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'quote_request' %}"
+            class="btn btn-primary mt-3 mt-md-0"
+        >
+            <i class="bi bi-plus-lg me-2"></i>
+            New Quotation
+        </a>
+
+    </div>
+
+
+    <!-- Statistics -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-secondary mb-1">
+                                Total Quotations
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ quotations|length }}
+                            </h3>
+                        </div>
+
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-receipt text-primary fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-secondary mb-1">
+                                Draft Quotations
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                {{ quotations|length }}
+                            </h3>
+                        </div>
+
+                        <div class="bg-warning bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-file-earmark-text text-warning fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+                            <p class="text-secondary mb-1">
+                                Dashboard
+                            </p>
+
+                            <h3 class="fw-bold mb-0">
+                                Active
+                            </h3>
+                        </div>
+
+                        <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                            <i class="bi bi-speedometer2 text-success fs-4"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Quotations Table -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <h5 class="fw-bold mb-0">
+                All Quotations
+            </h5>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            {% if quotations %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="px-4">Quotation</th>
+                                <th>Customer</th>
+                                <th>Business</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for quotation in quotations %}
+
+                                <tr>
+
+                                    <td class="px-4">
+
+                                        <span class="fw-semibold">
+                                            {{ quotation.quotation_number }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+                                            {{ quotation.customer.name }}
+                                        </div>
+
+                                        {% if quotation.customer.company_name %}
+
+                                            <small class="text-secondary">
+                                                {{ quotation.customer.company_name }}
+                                            </small>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ quotation.business.name }}
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="fw-bold">
+                                            ₹{{ quotation.grand_total|floatformat:2 }}
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if quotation.status == "draft" %}
+
+                                            <span class="badge text-bg-warning">
+                                                Draft
+                                            </span>
+
+                                        {% elif quotation.status == "sent" %}
+
+                                            <span class="badge text-bg-primary">
+                                                Sent
+                                            </span>
+
+                                        {% elif quotation.status == "accepted" %}
+
+                                            <span class="badge text-bg-success">
+                                                Accepted
+                                            </span>
+
+                                        {% elif quotation.status == "rejected" %}
+
+                                            <span class="badge text-bg-danger">
+                                                Rejected
+                                            </span>
+
+                                        {% elif quotation.status == "expired" %}
+
+                                            <span class="badge text-bg-secondary">
+                                                Expired
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <small class="text-secondary">
+                                            {{ quotation.created_at|date:"d M Y" }}
+                                        </small>
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="text-center py-5">
+
+                    <i class="bi bi-receipt fs-1 text-secondary"></i>
+
+                    <h5 class="fw-bold mt-3">
+                        No quotations yet
+                    </h5>
+
+                    <p class="text-secondary">
+                        Create your first quotation to see it here.
+                    </p>
+
+                    <a
+                        href="{% url 'quote_request' %}"
+                        class="btn btn-primary"
+                    >
+                        Create Quotation
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
